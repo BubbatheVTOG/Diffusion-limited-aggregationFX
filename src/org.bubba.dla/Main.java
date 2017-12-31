@@ -17,7 +17,8 @@ public class Main extends Application {
 	private Canvas canvas;
 	private AnimationTimer at;
 	private MyRandom rand = new MyRandom();
-	private int MAX_WALKERS = 10;
+	private int MAX_WALKERS = 1;
+	private double movementAmount = 1.0;
 
 	private ArrayList<Walker> Walkers = new ArrayList<Walker>();
 
@@ -85,12 +86,8 @@ public class Main extends Application {
 
 	class MyRandom extends Random{
 
-		Random aRandom = new Random();
-
 		public int nonNegativeNextInt(int bound){
-			bound = (bound < 0)? bound * -1: bound;
-			int val = aRandom.nextInt(bound);
-			return (val < 0)? val * -1: val;
+			return this.nextInt(Math.abs(bound));
 		}
 	}
 
