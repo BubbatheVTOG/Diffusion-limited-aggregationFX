@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Vector;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -18,7 +19,7 @@ public class Main extends Application {
 
 	private double movementFactor = 10.0;
 	private double walkerSize = 10.0;
-	private int MAX_WALKERS = 100;
+	private int MAX_WALKERS = 10;
 
 	private GraphicsContext gcTree, gcWalker;
 	private Canvas canvasTree, canvasWalker;
@@ -83,15 +84,16 @@ public class Main extends Application {
 	}
 
 	public void update(){
+		Vector<Thread> updateThreads = new Vector<Thread>();
 		for(Walker w : Walkers){
-			w.update();
-			/*
-			 * for(Walker t : Tree){
-			 *         if(w.collides(t)){
-			 *                 t.setFrozen();
-			 *         }
-			 * }
-			 */
+			new Thread(w).start();
+		}
+		for(Thread t : updateThreads){
+			try{
+				t.join();
+			}catch(InterruptedException ie){
+				System.out.println("A update thread got interrupted.");
+			}
 		}
 		System.out.println("ran update");
 	}
@@ -110,33 +112,37 @@ public class Main extends Application {
 		System.out.println("ran draw");
 	}
 
-	class Walker extends Circle {
+	class Walker extends Circle implements Runnable{
 
-		private	boolean frozen;
+		private	boolean frozen = true;
 
 		public Walker(double x, double y, double r){
 			super(x,y,r);
 		}
 
-		public void update(){
+		private void update(){
 			if(this.frozen){
 				super.setCenterX((super.getCenterX()+rand.nextDouble())*
 						movementFactor);
 				super.setCenterY((super.getCenterY()+rand.nextDouble())*
 						movementFactor);
-				//TODO: add size scaling.
+				System.out.println("got here");
 			}
 		}
 
-		public void setFrozen(){
+		private void setFrozen(){
 			this.frozen = false;
 			Tree.add(Walkers.get(Walkers.indexOf(this)));
 			Walkers.remove(this);
 		}
 
 		//TODO: finish this.
-		public boolean collides(Walker w){
+		private boolean collides(Walker otherWalker){
 			return true;
+		}
+
+		public void run(){
+			this.update();
 		}
 	}
 }
