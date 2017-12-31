@@ -40,6 +40,7 @@ public class Main extends Application {
 		gcWalker.setFill(Color.BLUE);
 		gcTree = canvasTree.getGraphicsContext2D();
 		gcTree.setFill(Color.RED);
+		canvasWalker.toFront();
 
 		Walker centerWalker = new Walker(canvasTree.getWidth()/2.0,
 				canvasTree.getHeight()/2.0,walkerSize);
@@ -54,10 +55,13 @@ public class Main extends Application {
 						walkerSize)
 					);
 		}
-		for(Walker w : Walkers){
-			gcWalker.fillOval(w.getCenterX(),w.getCenterY(),
-					w.getRadius(),w.getRadius());
-		}
+
+		/*
+		 * for(Walker w : Walkers){
+		 *         gcWalker.fillOval(w.getCenterX(),w.getCenterY(),
+		 *                         w.getRadius(),w.getRadius());
+		 * }
+		 */
 
 		Pane pane = new Pane();
 		pane.getChildren().addAll(canvasTree,canvasWalker);
@@ -77,17 +81,25 @@ public class Main extends Application {
 		new AnimationTimer(){
 			@Override
 			public void handle(long now){
-				Main.this.update();
 				Main.this.draw();
+				Main.this.update();
 			}
 		}.start();
 	}
 
 	public void update(){
 		Vector<Thread> updateThreads = new Vector<Thread>();
+
+		/*
+		 * for(Walker w: Walkers){
+		 *         w.walk();
+		 * }
+		 */
+
 		for(Walker w : Walkers){
 			new Thread(w).start();
 		}
+
 		for(Thread t : updateThreads){
 			try{
 				t.join();
@@ -99,39 +111,47 @@ public class Main extends Application {
 	}
 
 	public void draw(){
+
 		gcWalker.clearRect(0,0,canvasWalker.getWidth(),
 				canvasWalker.getHeight());
-		for(Walker w : Walkers){
-			gcWalker.fillOval(w.getCenterX(),w.getCenterY(),
-					w.getRadius(),w.getRadius());
-		}
+
 		for(Walker t : Tree){
 			gcTree.fillOval(t.getCenterX(),t.getCenterY(),
 					t.getRadius(),t.getRadius());
 		}
+
+		for(Walker w : Walkers){
+			gcWalker.fillOval(w.getCenterX(),w.getCenterY(),
+					w.getRadius(),w.getRadius());
+		}
+
 		System.out.println("ran draw");
 	}
 
 	class Walker extends Circle implements Runnable{
 
-		private	boolean frozen = true;
+		private	boolean frozen = false;
 
 		public Walker(double x, double y, double r){
 			super(x,y,r);
 		}
 
-		private void update(){
-			if(this.frozen){
-				super.setCenterX((super.getCenterX()+rand.nextDouble())*
-						movementFactor);
-				super.setCenterY((super.getCenterY()+rand.nextDouble())*
-						movementFactor);
-				System.out.println("got here");
+		private void walk(){
+			if(!this.frozen){
+				this.setCenterX(rand.nextBoolean()?
+						(this.getCenterX()+rand.nextDouble()*-1)*movementFactor:
+						(this.getCenterX()+rand.nextDouble())*movementFactor);
+
+				this.setCenterY(rand.nextBoolean()?
+						(this.getCenterY()+rand.nextDouble()*-1)*movementFactor:
+						(this.getCenterY()+rand.nextDouble())*movementFactor);
+
+				System.out.println("ran walk");
 			}
 		}
 
 		private void setFrozen(){
-			this.frozen = false;
+			this.frozen = true;
 			Tree.add(Walkers.get(Walkers.indexOf(this)));
 			Walkers.remove(this);
 		}
@@ -142,7 +162,7 @@ public class Main extends Application {
 		}
 
 		public void run(){
-			this.update();
+			this.walk();
 		}
 	}
 }
