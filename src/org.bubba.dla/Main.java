@@ -16,7 +16,7 @@ public class Main extends Application {
 
 	private int windowSize = 1200;
 
-	private double movementAmount = 10.0;
+	private double movementFactor = 10.0;
 	private double walkerSize = 10.0;
 	private int MAX_WALKERS = 100;
 
@@ -84,12 +84,14 @@ public class Main extends Application {
 
 	public void update(){
 		for(Walker w : Walkers){
-			w.update(rand.nextDouble(),rand.nextGaussian(),walkerSize);
-			for(Walker t : Tree){
-				if(w.collides(t)){
-					t.setFrozen();
-				}
-			}
+			w.update();
+			/*
+			 * for(Walker t : Tree){
+			 *         if(w.collides(t)){
+			 *                 t.setFrozen();
+			 *         }
+			 * }
+			 */
 		}
 		System.out.println("ran update");
 	}
@@ -101,9 +103,9 @@ public class Main extends Application {
 			gcWalker.fillOval(w.getCenterX(),w.getCenterY(),
 					w.getRadius(),w.getRadius());
 		}
-		for(Walker w : Tree){
-			gcTree.fillOval(w.getCenterX(),w.getCenterY(),
-					w.getRadius(),w.getRadius());
+		for(Walker t : Tree){
+			gcTree.fillOval(t.getCenterX(),t.getCenterY(),
+					t.getRadius(),t.getRadius());
 		}
 		System.out.println("ran draw");
 	}
@@ -113,16 +115,16 @@ public class Main extends Application {
 		private	boolean frozen;
 
 		public Walker(double x, double y, double r){
-			super.setCenterX(x);
-			super.setCenterY(y);
-			super.setRadius(r);
+			super(x,y,r);
 		}
 
-		public void update(double x, double y, double r){
+		public void update(){
 			if(this.frozen){
-				super.setCenterX((super.getCenterX()+x)*movementAmount);
-				super.setCenterY((super.getCenterY()+y)*movementAmount);
-				super.setRadius(r);
+				super.setCenterX((super.getCenterX()+rand.nextDouble())*
+						movementFactor);
+				super.setCenterY((super.getCenterY()+rand.nextDouble())*
+						movementFactor);
+				//TODO: add size scaling.
 			}
 		}
 
@@ -132,6 +134,7 @@ public class Main extends Application {
 			Walkers.remove(this);
 		}
 
+		//TODO: finish this.
 		public boolean collides(Walker w){
 			return true;
 		}
