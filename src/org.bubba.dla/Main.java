@@ -21,11 +21,12 @@ public class Main extends Application {
 	private double walkerSize = 10.0;
 	private int MAX_WALKERS = 1000;
 
-	private Canvas canvasWalker;
+	private Canvas canvas;
 	private GraphicsContext gcWalker;
 	private Random rand = new Random();
 
 	private ArrayList<Walker> walkers = new ArrayList<Walker>();
+	private ArrayList<Walker> tree = new ArrayList<Walker>();
 
 	public static void main(String[] args){
 		launch(args);
@@ -33,18 +34,23 @@ public class Main extends Application {
 
 	public void start(Stage window){
 
-		canvasWalker = new Canvas(windowSize,windowSize);
-		gcWalker = canvasWalker.getGraphicsContext2D();
-		canvasWalker.toFront();
+		canvas = new Canvas(windowSize,windowSize);
+		gcWalker = canvas.getGraphicsContext2D();
+		canvas.toFront();
 
 		for(int i=0; i<MAX_WALKERS; i++){
-			walkers.add(new Walker((double)rand.nextInt((int)canvasWalker.getWidth()),
-						(double)rand.nextInt((int)canvasWalker.getHeight()),
+			walkers.add(new Walker((double)rand.nextInt((int)canvas.getWidth()),
+						(double)rand.nextInt((int)canvas.getHeight()),
 						walkerSize));
 		}
 
+		Walker startNode = new Walker(canvas.getWidth()/2.0,canvas.getHeight()/2.0,walkerSize);
+		startNode.setFrozen();
+		tree.add(startNode);
+
 		Pane pane = new Pane();
-		pane.getChildren().addAll(canvasWalker);
+		pane.setStyle("-fx-background-color: black");
+		pane.getChildren().addAll(canvas);
 
 		Scene scene = new Scene(pane,windowSize,windowSize);
 
@@ -59,7 +65,7 @@ public class Main extends Application {
 			@Override
 			public void handle(long now){
 				Main.this.update();
-				Main.this.draw();
+				Main.this.draw(gcWalker);
 			}
 		}.start();
 	}
@@ -82,11 +88,18 @@ public class Main extends Application {
 		// System.out.println(""+walkers.get(0).getCenterX());
 	}
 
-	public void draw(){
-		gcWalker.clearRect(0,0,canvasWalker.getWidth(),canvasWalker.getHeight());
+	public void draw(GraphicsContext gc){
+		gcWalker.clearRect(0,0,canvas.getWidth(),canvas.getHeight());
+		gc.setFill(Color.AQUAMARINE);
 		for(Walker w: walkers){
-			gcWalker.fillOval(w.getCenterX(), w.getCenterY(),
+			gc.fillOval(w.getCenterX(), w.getCenterY(),
 					w.getRadius(),w.getRadius());
+		}
+
+		gc.setFill(Color.FIREBRICK);
+		for(Walker t: tree){
+			gc.fillOval(t.getCenterX(), t.getCenterY(),
+					t.getRadius(),t.getRadius());
 		}
 	}
 
@@ -96,7 +109,7 @@ public class Main extends Application {
 
 		public Walker(double x, double y, double r){
 			super(x,y,r);
-			super.setFill(Paint.valueOf("red"));
+			super.setFill(Paint.valueOf("blue"));
 		}
 
 		public boolean isFrozen(){
