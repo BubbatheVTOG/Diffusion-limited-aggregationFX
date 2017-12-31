@@ -9,6 +9,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
@@ -21,8 +22,10 @@ public class Main extends Application {
 	private double walkerSize = 10.0;
 	private int MAX_WALKERS = 10;
 
-	private GraphicsContext gcTree, gcWalker;
-	private Canvas canvasTree, canvasWalker;
+	// private GraphicsContext gcTree, gcWalker;
+	private GraphicsContext gcWalker;
+	// private Canvas canvasTree, canvasWalker;
+	private Canvas canvasWalker;
 	private Random rand = new Random();
 
 	private ArrayList<Walker> Walkers = new ArrayList<Walker>();
@@ -35,18 +38,18 @@ public class Main extends Application {
 	public void start(Stage window){
 
 		canvasWalker = new Canvas(windowSize,windowSize);
-		canvasTree = new Canvas(windowSize,windowSize);
+		// canvasTree = new Canvas(windowSize,windowSize);
 		gcWalker = canvasWalker.getGraphicsContext2D();
 		gcWalker.setFill(Color.BLUE);
-		gcTree = canvasTree.getGraphicsContext2D();
-		gcTree.setFill(Color.RED);
+		// gcTree = canvasTree.getGraphicsContext2D();
+		// gcTree.setFill(Color.RED);
 		canvasWalker.toFront();
 
-		Walker centerWalker = new Walker(canvasTree.getWidth()/2.0,
-				canvasTree.getHeight()/2.0,walkerSize);
+		// Walker centerWalker = new Walker(canvasTree.getWidth()/2.0,
+				// canvasTree.getHeight()/2.0,walkerSize);
 
-		gcTree.fillOval(centerWalker.getCenterX(),centerWalker.getCenterY(),
-				centerWalker.getRadius(),centerWalker.getRadius());
+		// gcTree.fillOval(centerWalker.getCenterX(),centerWalker.getCenterY(),
+				// centerWalker.getRadius(),centerWalker.getRadius());
 
 		for(int i=0; i<MAX_WALKERS; i++){
 			Walkers.add(new Walker(
@@ -63,13 +66,14 @@ public class Main extends Application {
 		 * }
 		 */
 
-		Pane pane = new Pane();
-		pane.getChildren().addAll(canvasTree,canvasWalker);
-		BorderPane bpMain = new BorderPane();
-		bpMain.setStyle("-fx-background-color: black");
-		bpMain.setCenter(pane);
+		StackPane pane = new StackPane();
+		// pane.getChildren().addAll(canvasTree,canvasWalker);
+		pane.getChildren().addAll(canvasWalker);
+		// BorderPane bpMain = new BorderPane();
+		// bpMain.setStyle("-fx-background-color: black");
+		// bpMain.setCenter(pane);
 
-		Scene scene = new Scene(bpMain,windowSize,windowSize);
+		Scene scene = new Scene(pane,windowSize,windowSize);
 
 		window.setMinWidth(windowSize);
 		window.setMaxWidth(windowSize);
@@ -81,8 +85,8 @@ public class Main extends Application {
 		new AnimationTimer(){
 			@Override
 			public void handle(long now){
-				Main.this.draw();
 				Main.this.update();
+				Main.this.draw();
 			}
 		}.start();
 	}
@@ -97,7 +101,10 @@ public class Main extends Application {
 		 */
 
 		for(Walker w : Walkers){
-			new Thread(w).start();
+			updateThreads.add(new Thread(w));
+		}
+		for(Thread t : updateThreads){
+			t.start();
 		}
 
 		for(Thread t : updateThreads){
@@ -112,13 +119,13 @@ public class Main extends Application {
 
 	public void draw(){
 
-		gcWalker.clearRect(0,0,canvasWalker.getWidth(),
-				canvasWalker.getHeight());
+		// gcWalker.clearRect(0,0,canvasWalker.getWidth(),
+				// canvasWalker.getHeight());
 
-		for(Walker t : Tree){
-			gcTree.fillOval(t.getCenterX(),t.getCenterY(),
-					t.getRadius(),t.getRadius());
-		}
+		// for(Walker t : Tree){
+			// gcTree.fillOval(t.getCenterX(),t.getCenterY(),
+					// t.getRadius(),t.getRadius());
+		// }
 
 		for(Walker w : Walkers){
 			gcWalker.fillOval(w.getCenterX(),w.getCenterY(),
