@@ -5,7 +5,7 @@ This is based on a white paper published by [Paul Brourke](http://paulbourke.net
 
 ### This is the result of an example run:
 
-![alt text](https://i.imgur.com/siDTEys.png "Example Run")
+![alt text](https://i.imgur.com/siDTEysb.png "Example Run")
 
 ### This is a live run with large particles.
 
