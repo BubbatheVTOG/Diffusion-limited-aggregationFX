@@ -38,9 +38,10 @@ public class Main extends Application {
 
 	//change the properties of our walkers.
 	private double movementFactor = 5.0;
-	private double walkerSize = 15.0;
-	private int concurrentWalkers = 400;
+	private double walkerSize = 3.0;
+	private int concurrentWalkers = 100;
 	private boolean infiniteWalkers = true;
+	private int skipFrames = 0;
 
 	//change the colors of the walkers.
 	private Color walkerColor = Color.AQUAMARINE;
@@ -96,7 +97,7 @@ public class Main extends Application {
 
 		Scene scene = new Scene(pane,windowSize,windowSize);
 		//TODO: This is wicked broken, don't know if its just a linux thing.
-		//((Pane)scene.getRoot()).getChildren().addAll(menuBar);
+		((Pane)scene.getRoot()).getChildren().addAll(menuBar);
 
 		//Window size contants because of i3wm.
 		window.setMinWidth(windowSize);
@@ -111,7 +112,7 @@ public class Main extends Application {
 		at = new AnimationTimer(){
 			@Override
 			public void handle(long now){
-				for(int i=0; i<10 ;i++){
+				for(int i=0; i<=skipFrames ;i++){
 					Main.this.update();
 				}
 				Main.this.draw(gcWalker);
