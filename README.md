@@ -9,7 +9,7 @@ This is based on a white paper published by [Paul Brourke](http://paulbourke.net
 
 ### This is a live run with large particles.
 
-![alt text](https://i.imgur.com/Wjh36df.gifv "Live Run")
+![alt text](https://i.imgur.com/Wjh36df.gif "Live Run")
 
 Todo:
 
