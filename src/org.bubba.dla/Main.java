@@ -13,20 +13,33 @@ import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import javafx.scene.paint.Paint;
 
+//TODO:
+//fix error
+//change colors
+//change size
+//infiniteWalkers - done
+//boundry checking
+//mousedrag listener
+//title
+//menu -> new && stop
+
 public class Main extends Application {
 
-	private int windowSize = 1200;
+	private int windowSize = 800;
 
 	private double movementFactor = 3.0;
 	private double walkerSize = 10.0;
-	private int MAX_WALKERS = 1000;
+	private int concurrentWalkers = 800;
+	private boolean infiniteWalkers = true;
+
+	private Color walkerColor = Color.AQUAMARINE;
+	private Color treeColor = Color.FIREBRICK;
 
 	private Canvas canvas;
-	private GraphicsContext gcWalker;
 	private Random rand = new Random();
 
-	private ArrayList<Walker> walkers = new ArrayList<Walker>();
-	private ArrayList<Walker> tree = new ArrayList<Walker>();
+	private Vector<Walker> walkers = new Vector<Walker>();
+	private Vector<Walker> tree = new Vector<Walker>();
 
 	public static void main(String[] args){
 		launch(args);
@@ -35,10 +48,10 @@ public class Main extends Application {
 	public void start(Stage window){
 
 		canvas = new Canvas(windowSize,windowSize);
-		gcWalker = canvas.getGraphicsContext2D();
+		GraphicsContext gcWalker = canvas.getGraphicsContext2D();
 		canvas.toFront();
 
-		for(int i=0; i<MAX_WALKERS; i++){
+		for(int i=0; i<concurrentWalkers; i++){
 			walkers.add(new Walker((double)rand.nextInt((int)canvas.getWidth()),
 						(double)rand.nextInt((int)canvas.getHeight()),
 						walkerSize));
@@ -86,21 +99,41 @@ public class Main extends Application {
 			}
 		}
 		// System.out.println(""+walkers.get(0).getCenterX());
+		if(infiniteWalkers){
+			for(int i=walkers.size(); i<concurrentWalkers; i++){
+				walkers.add(new Walker((double)rand.nextInt((int)canvas.getWidth()),
+							(double)rand.nextInt((int)canvas.getHeight()),
+							walkerSize));
+			}
+		}
 	}
 
 	public void draw(GraphicsContext gc){
-		gcWalker.clearRect(0,0,canvas.getWidth(),canvas.getHeight());
-		gc.setFill(Color.AQUAMARINE);
+		gc.clearRect(0,0,canvas.getWidth(),canvas.getHeight());
+		gc.setFill(walkerColor);
 		for(Walker w: walkers){
 			gc.fillOval(w.getCenterX(), w.getCenterY(),
 					w.getRadius(),w.getRadius());
 		}
 
-		gc.setFill(Color.FIREBRICK);
+		gc.setFill(treeColor);
 		for(Walker t: tree){
 			gc.fillOval(t.getCenterX(), t.getCenterY(),
 					t.getRadius(),t.getRadius());
 		}
+	}
+
+	public void shiftTreeColor(Walker walker){
+		double currentGreen = treeColor.getGreen();
+		double currentRed = treeColor.getRed();
+		double currentBlue = treeColor.getBlue();
+
+		double minX = Math.min(Math.min(0,walker.getCenterX()),
+				Math.min(canvas.getWidth(),walker.getCenterX()));
+		double minY = Math.min(Math.min(0,walker.getCenterY()),
+				Math.min(canvas.getWidth(),walker.getCenterY()));
+
+		double min = Math.min(minX,minY);
 	}
 
 	class Walker extends Circle implements Runnable{
@@ -112,33 +145,57 @@ public class Main extends Application {
 			super.setFill(Paint.valueOf("blue"));
 		}
 
-		public boolean isFrozen(){
+		public void setFrozen(){
+			frozen=true;
+		}
+
+		private boolean isFrozen(){
 			return frozen;
 		}
 
-		public void setFrozen(){
+		private void setFrozenAndChangeState(){
 			frozen=true;
+			if(this.frozen){
+				tree.add(walkers.remove(walkers.indexOf(this)));
+			}
+		}
+
+		private boolean collides(Walker otherWalker){
+			boolean collides = false;
+			double distance = Math.sqrt(
+					(this.getCenterX()-otherWalker.getCenterX())*(this.getCenterX()-otherWalker.getCenterX())+
+					(this.getCenterY()-otherWalker.getCenterY())*(this.getCenterY()-otherWalker.getCenterY())
+					);
+
+			if((distance < (this.getRadius()+otherWalker.getRadius())/2.0) && otherWalker.isFrozen()){
+				collides=true;
+			}
+			return collides;
 		}
 
 		public void run(){
 			this.update();
 		}
 
-		//TODO change this to private.
-		public void update(){
+		private void update(){
 			if(!this.frozen){
-				super.setCenterX(rand.nextBoolean()?
-						((rand.nextDouble()*movementFactor)*-1)+super.getCenterX():
-						(rand.nextDouble()*movementFactor)+super.getCenterX()
+				this.setCenterX(rand.nextBoolean()?
+						((rand.nextDouble()*movementFactor)*-1)+this.getCenterX():
+						(rand.nextDouble()*movementFactor)+this.getCenterX()
 						);
 
 				super.setCenterY(rand.nextBoolean()?
-						((rand.nextDouble()*movementFactor)*-1)+super.getCenterY():
-						(rand.nextDouble()*movementFactor)+super.getCenterY()
+						((rand.nextDouble()*movementFactor)*-1)+this.getCenterY():
+						(rand.nextDouble()*movementFactor)+this.getCenterY()
 						);
 			}
 
+			for(Walker t: tree){
+				if(this.collides(t)){
+					this.setFrozenAndChangeState();
+					Main.this.shiftTreeColor(t);
+				}
+			}
 		}
-
 	}
 }
