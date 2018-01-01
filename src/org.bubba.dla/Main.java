@@ -32,6 +32,7 @@ import javafx.stage.Stage;
 //stickiness factor
 //implement a skip frames slider
 //change walker behavior to only check for tree particles within the movementFactor radius?
+//make this use JOGL, but that is beyond me atm.
 
 public class Main extends Application {
 
@@ -39,10 +40,10 @@ public class Main extends Application {
 	private int windowSize = 800;
 
 	//change the properties of our walkers.
-	//movementFactor: movement is -1,1 inclusively, this scales it.
-	//walkerSize: how large to make the walkers.
-	//concurrentWalkers: how many walkers should there be?
-	//infiniteWalkers:add a new walker when one attaches itself to to the tree.
+	//movementFactor: Movement is -1,1 inclusively, this scales it.
+	//walkerSize: How large to make the walkers.
+	//concurrentWalkers: How many walkers should there be?
+	//infiniteWalkers: Add a new walker when one attaches itself to to the tree.
 	private double movementFactor = 5.0;
 	private double walkerSize = 10.0;
 	private int concurrentWalkers = 800;
