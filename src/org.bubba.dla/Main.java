@@ -42,7 +42,8 @@ public class Main extends Application {
 	//change the properties of our walkers.
 	//movementFactor: Movement is -1,1 inclusively, this scales it.
 	//walkerSize: How large to make the walkers.
-	//concurrentWalkers: How many walkers should there be?
+	//concurrentWalkers: How many walkers should there be? More than 1500 seems to be a bottle neck.
+	// 	Remember, if you have infiniteWalkers=true, then you can easily reach that limit with a small tree.
 	//infiniteWalkers: Add a new walker when one attaches itself to to the tree.
 	private double movementFactor = 5.0;
 	private double walkerSize = 10.0;
