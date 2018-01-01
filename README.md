@@ -1,2 +1,4 @@
 # Diffusion-limited-aggregationFX
-Diffusion-limited aggregation in JavaFX
+This generates Diffusion-limited-aggregation using the JavaFX graphics framework.
+
+![alt text](https://i.imgur.com/siDTEys.png "Example Run")
