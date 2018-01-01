@@ -41,7 +41,12 @@ public class Main extends Application {
 	private double walkerSize = 3.0;
 	private int concurrentWalkers = 100;
 	private boolean infiniteWalkers = true;
-	private int skipFrames = 0;
+
+	//Change these to change display settings.
+	//Some of these settings will result in procedure speedups.
+	private int skipFramesRatio = 100;
+	private boolean displayIterrations = true;
+	private int dontUpdateUntil = 100000;
 
 	//change the colors of the walkers.
 	private Color walkerColor = Color.AQUAMARINE;
@@ -54,6 +59,7 @@ public class Main extends Application {
 	private Vector<Walker> walkers = new Vector<Walker>();
 	private Vector<Walker> deadWalkers = new Vector<Walker>();
 	private Vector<Walker> tree = new Vector<Walker>();
+	double itterations = 0.0;
 
 	//its main() yo.
 	public static void main(String[] args){
@@ -97,7 +103,7 @@ public class Main extends Application {
 
 		Scene scene = new Scene(pane,windowSize,windowSize);
 		//TODO: This is wicked broken, don't know if its just a linux thing.
-		((Pane)scene.getRoot()).getChildren().addAll(menuBar);
+		//((Pane)scene.getRoot()).getChildren().addAll(menuBar);
 
 		//Window size contants because of i3wm.
 		window.setMinWidth(windowSize);
@@ -112,10 +118,15 @@ public class Main extends Application {
 		at = new AnimationTimer(){
 			@Override
 			public void handle(long now){
-				for(int i=0; i<=skipFrames ;i++){
+				for(int i=0; i<=skipFramesRatio ;i++){
 					Main.this.update();
+					if(displayIterrations){
+						System.out.println("Itterations: "+itterations);
+					}
 				}
-				Main.this.draw(gcWalker);
+				if(itterations > dontUpdateUntil){
+					Main.this.draw(gcWalker);
+				}
 			}
 		};
 		at.start();
@@ -168,6 +179,7 @@ public class Main extends Application {
 							walkerSize));
 			}
 		}
+		itterations++;
 	}
 
 	//Draw all of the things.
