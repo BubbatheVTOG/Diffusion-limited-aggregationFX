@@ -15,6 +15,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.Stage;
 
 
@@ -30,23 +31,30 @@ import javafx.stage.Stage;
 //menu -> new,stop,exit -- WIP
 //stickiness factor
 //implement a skip frames slider
+//change walker behavior to only check for tree particles within the movementFactor radius?
 
 public class Main extends Application {
 
-	//Set our initial window size.
+	//Set our window size.
 	private int windowSize = 800;
 
 	//change the properties of our walkers.
+	//movementFactor: movement is -1,1 inclusively, this scales it.
+	//walkerSize: how large to make the walkers.
+	//concurrentWalkers: how many walkers should there be?
+	//infiniteWalkers:add a new walker when one attaches itself to to the tree.
 	private double movementFactor = 5.0;
-	private double walkerSize = 3.0;
-	private int concurrentWalkers = 100;
+	private double walkerSize = 10.0;
+	private int concurrentWalkers = 800;
 	private boolean infiniteWalkers = true;
 
 	//Change these to change display settings.
 	//Some of these settings will result in procedure speedups.
-	private int skipFramesRatio = 100;
-	private boolean displayIterrations = true;
-	private int dontUpdateUntil = 100000;
+	//default settings: 1,false,1
+	//try: 100,true,50000
+	private int skipFramesRatio = 1;
+	private boolean displayIterrations = false;
+	private int dontUpdateUntil = 1;
 
 	//change the colors of the walkers.
 	private Color walkerColor = Color.AQUAMARINE;
@@ -96,14 +104,18 @@ public class Main extends Application {
 		//Menu stuff.
 		MenuBar menuBar = new MenuBar();
 		Menu menuMenu = new Menu("Menu");
+		MenuItem menuPause = new MenuItem("Pause");
+		MenuItem menuStart = new MenuItem("Start");
+		menuStart.setDisable(true);
+		SeparatorMenuItem smiMenu = new SeparatorMenuItem();
 		MenuItem miExit = new MenuItem("Exit");
 
-		menuMenu.getItems().addAll(miExit);
+		menuMenu.getItems().addAll(menuPause,menuStart,smiMenu,miExit);
 		menuBar.getMenus().addAll(menuMenu);
 
 		Scene scene = new Scene(pane,windowSize,windowSize);
 		//TODO: This is wicked broken, don't know if its just a linux thing.
-		//((Pane)scene.getRoot()).getChildren().addAll(menuBar);
+		((Pane)scene.getRoot()).getChildren().addAll(menuBar);
 
 		//Window size contants because of i3wm.
 		window.setMinWidth(windowSize);
@@ -134,6 +146,18 @@ public class Main extends Application {
 		//Click the canvas to add new walkers.
 		canvas.setOnMouseDragged(e -> {
 			walkers.add(new Walker(e.getX(),e.getY(),walkerSize));
+		});
+
+		menuPause.setOnAction(e -> {
+			at.stop();
+			menuStart.setDisable(false);
+			menuPause.setDisable(true);
+		});
+
+		menuStart.setOnAction(e -> {
+			at.start();
+			menuStart.setDisable(true);
+			menuPause.setDisable(false);
 		});
 
 		miExit.setOnAction(e ->{
