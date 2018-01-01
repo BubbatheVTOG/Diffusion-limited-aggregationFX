@@ -28,6 +28,8 @@ import javafx.stage.Stage;
 //mousedrag listener -- done
 //title -- done
 //menu -> new,stop,exit -- WIP
+//stickiness factor
+//implement a skip frames slider
 
 public class Main extends Application {
 
@@ -36,8 +38,8 @@ public class Main extends Application {
 
 	//change the properties of our walkers.
 	private double movementFactor = 5.0;
-	private double walkerSize = 5.0;
-	private int concurrentWalkers = 100;
+	private double walkerSize = 15.0;
+	private int concurrentWalkers = 400;
 	private boolean infiniteWalkers = true;
 
 	//change the colors of the walkers.
@@ -94,7 +96,7 @@ public class Main extends Application {
 
 		Scene scene = new Scene(pane,windowSize,windowSize);
 		//TODO: This is wicked broken, don't know if its just a linux thing.
-		((Pane)scene.getRoot()).getChildren().addAll(menuBar);
+		//((Pane)scene.getRoot()).getChildren().addAll(menuBar);
 
 		//Window size contants because of i3wm.
 		window.setMinWidth(windowSize);
@@ -109,7 +111,9 @@ public class Main extends Application {
 		at = new AnimationTimer(){
 			@Override
 			public void handle(long now){
-				Main.this.update();
+				for(int i=0; i<10 ;i++){
+					Main.this.update();
+				}
 				Main.this.draw(gcWalker);
 			}
 		};
