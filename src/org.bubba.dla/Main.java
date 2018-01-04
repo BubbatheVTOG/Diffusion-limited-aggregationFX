@@ -1,17 +1,17 @@
-import java.util.ArrayList;
+package org.bubba.dla;
+
 import java.util.Random;
 import java.util.Vector;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.paint.Paint;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -66,10 +66,10 @@ public class Main extends Application {
 	private Canvas canvas;
 	private Random rand = new Random();
 	private AnimationTimer at;
-	private Vector<Walker> walkers = new Vector<Walker>();
-	private Vector<Walker> deadWalkers = new Vector<Walker>();
-	private Vector<Walker> tree = new Vector<Walker>();
-	double itterations = 0.0;
+	private Vector<Walker> walkers = new Vector<>();
+	private Vector<Walker> deadWalkers = new Vector<>();
+	private Vector<Walker> tree = new Vector<>();
+	private double iterations = 0.0;
 
 	//its main() yo.
 	public static void main(String[] args){
@@ -103,6 +103,9 @@ public class Main extends Application {
 		pane.setStyle("-fx-background-color: black");
 		pane.getChildren().addAll(canvas);
 
+		BorderPane bpMain = new BorderPane();
+		bpMain.setCenter(pane);
+
 		//Menu stuff.
 		MenuBar menuBar = new MenuBar();
 		Menu menuMenu = new Menu("Menu");
@@ -115,9 +118,8 @@ public class Main extends Application {
 		menuMenu.getItems().addAll(menuPause,menuStart,smiMenu,miExit);
 		menuBar.getMenus().addAll(menuMenu);
 
-		Scene scene = new Scene(pane,windowSize,windowSize);
-		//TODO: This is wicked broken, don't know if its just a linux thing.
-		((Pane)scene.getRoot()).getChildren().addAll(menuBar);
+		Scene scene = new Scene(bpMain,windowSize,windowSize);
+		bpMain.setTop(menuBar);
 
 		//Window size contants because of i3wm.
 		window.setMinWidth(windowSize);
@@ -135,10 +137,10 @@ public class Main extends Application {
 				for(int i=0; i<=skipFramesRatio ;i++){
 					Main.this.update();
 					if(displayIterrations){
-						System.out.println("Itterations: "+itterations);
+						System.out.println("Itterations: "+iterations);
 					}
 				}
-				if(itterations > dontUpdateUntil){
+				if(iterations > dontUpdateUntil){
 					Main.this.draw(gcWalker);
 				}
 			}
@@ -146,9 +148,7 @@ public class Main extends Application {
 		at.start();
 
 		//Click the canvas to add new walkers.
-		canvas.setOnMouseDragged(e -> {
-			walkers.add(new Walker(e.getX(),e.getY(),walkerSize));
-		});
+		canvas.setOnMouseDragged(e -> walkers.add(new Walker(e.getX(),e.getY(),walkerSize)) );
 
 		menuPause.setOnAction(e -> {
 			at.stop();
@@ -162,14 +162,12 @@ public class Main extends Application {
 			menuPause.setDisable(false);
 		});
 
-		miExit.setOnAction(e ->{
-			System.exit(0);
-		});
+		miExit.setOnAction(e -> System.exit(0) );
 	}
 
 	//update all of the particles inside of threads.
-	public void update(){
-		Vector<Thread> updateThreads = new Vector<Thread>();
+	private void update(){
+		Vector<Thread> updateThreads = new Vector<>();
 		//create our threads.
 		for(Walker w: walkers){
 			updateThreads.add(new Thread(w));
@@ -205,11 +203,11 @@ public class Main extends Application {
 							walkerSize));
 			}
 		}
-		itterations++;
+		iterations++;
 	}
 
 	//Draw all of the things.
-	public void draw(GraphicsContext gc){
+	private void draw(GraphicsContext gc){
 		//clear our canvas every frame.
 		gc.clearRect(0,0,canvas.getWidth(),canvas.getHeight());
 		//set our walkers color.
@@ -248,12 +246,12 @@ public class Main extends Application {
 
 		private boolean frozen = false;
 
-		public Walker(double x, double y, double r){
+		private Walker(double x, double y, double r){
 			super(x,y,r);
 		}
 
 		//this is only used once, for the initial tree particle.
-		public void setFrozen(){
+		private void setFrozen(){
 			frozen=true;
 		}
 
@@ -266,10 +264,7 @@ public class Main extends Application {
 		//set our walker as frozen and mark it for removal in the Main.update().
 		private void setFrozenAndChangeState(){
 			frozen=true;
-			if(this.frozen){
-				//tree.add(walkers.remove(walkers.indexOf(this)));
-				deadWalkers.add(walkers.get(walkers.indexOf((this))));
-			}
+            deadWalkers.add(walkers.get(walkers.indexOf((this))));
 		}
 
 		//Check if it collides with a tree particle.
