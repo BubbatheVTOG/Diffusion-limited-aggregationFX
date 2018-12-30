@@ -1,22 +1,24 @@
+import javafx.animation.AnimationTimer;
+import javafx.application.Application;
+import javafx.event.EventHandler;
+import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
+import javafx.stage.Stage;
+
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Vector;
 
-import javafx.animation.AnimationTimer;
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.event.EventHandler;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.paint.Paint;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.stage.Stage;
-
+import java.awt.*;
+import java.awt.geom.*;
 
 //TODO:
 //comments -- done
@@ -33,13 +35,19 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
+	Toolkit t = Toolkit.getDefaultToolkit();
+
 	//Set our initial window size.
-	private int windowSize = 800;
+	Dimension d = t.getScreenSize();
+	private int windowSizeH = (int)d.getHeight();
+	private int windowSizeW = (int)d.getWidth();
+	// private int windowSizeH = 800;
+	// private int windowSizeW = 800;
 
 	//change the properties of our walkers.
 	private double movementFactor = 5.0;
-	private double walkerSize = 3.0;
-	private int concurrentWalkers = 100;
+	private double walkerSize = 30.0;
+	private int concurrentWalkers = 800;
 	private boolean infiniteWalkers = true;
 	private int skipFrames = 0;
 
@@ -55,6 +63,13 @@ public class Main extends Application {
 	private Vector<Walker> deadWalkers = new Vector<Walker>();
 	private Vector<Walker> tree = new Vector<Walker>();
 
+	//Tree sizees.
+	private int treeStartSize = (int)walkerSize*10;
+	private int maxX = treeStartSize;
+	private int minX = treeStartSize;
+	private int maxY = treeStartSize;
+	private int minY = treeStartSize;
+
 	//its main() yo.
 	public static void main(String[] args){
 		launch(args);
@@ -64,7 +79,7 @@ public class Main extends Application {
 	public void start(Stage window){
 
 		//this is our canvas.
-		canvas = new Canvas(windowSize,windowSize);
+		canvas = new Canvas(windowSizeW,windowSizeH);
 		//this is our GraphicsContext.
 		GraphicsContext gcWalker = canvas.getGraphicsContext2D();
 		//not really needed, but better safe than sorry.
@@ -95,15 +110,15 @@ public class Main extends Application {
 		menuMenu.getItems().addAll(miExit);
 		menuBar.getMenus().addAll(menuMenu);
 
-		Scene scene = new Scene(pane,windowSize,windowSize);
+		Scene scene = new Scene(pane,windowSizeW,windowSizeH);
 		//TODO: This is wicked broken, don't know if its just a linux thing.
 		((Pane)scene.getRoot()).getChildren().addAll(menuBar);
 
 		//Window size contants because of i3wm.
-		window.setMinWidth(windowSize);
-		window.setMaxWidth(windowSize);
-		window.setMinHeight(windowSize);
-		window.setMaxHeight(windowSize);
+		window.setMinWidth(windowSizeW);
+		window.setMaxWidth(windowSizeW);
+		window.setMinHeight(windowSizeH);
+		window.setMaxHeight(windowSizeH);
 		window.setTitle("Diffusion Limited Aggregation - By Bubba");
 		window.setScene(scene);
 		window.show();
@@ -132,23 +147,28 @@ public class Main extends Application {
 
 	//update all of the particles inside of threads.
 	public void update(){
-		Vector<Thread> updateThreads = new Vector<Thread>();
-		//create our threads.
-		for(Walker w: walkers){
-			updateThreads.add(new Thread(w));
-		}
-		//start our threads.
-		for(Thread t: updateThreads){
-			t.start();
-		}
-		//wait for them to join back in.
-		for(Thread t: updateThreads){
-			try{
-				t.join();
-			}catch(InterruptedException ie){
-				System.out.println("An update thread was interrupted.");
-			}
-		}
+		/*
+		 * Vector<Thread> updateThreads = new Vector<Thread>();
+		 * //create our threads.
+		 * for(Walker w: walkers){
+		 *         updateThreads.add(new Thread(w));
+		 * }
+		 * //start our threads.
+		 * for(Thread t: updateThreads){
+		 *         t.start();
+		 * }
+		 * //wait for them to join back in.
+		 * for(Thread t: updateThreads){
+		 *         try{
+		 *                 t.join();
+		 *         }catch(InterruptedException ie){
+		 *                 System.out.println("An update thread was interrupted.");
+		 *         }
+		 * }
+		 */
+
+		walkers.parallelStream()
+			.forEach( e -> e.update());
 
 		//remove "dead" walkers so that we don't have to calculate stuff for them.
 		//this is an **attempt** at some optimization.
@@ -163,9 +183,13 @@ public class Main extends Application {
 		//add new walkers when others die.
 		if(infiniteWalkers){
 			for(int i=walkers.size(); i<concurrentWalkers; i++){
-				walkers.add(new Walker((double)rand.nextInt((int)canvas.getWidth()),
+				Walker w = new Walker((double)rand.nextInt((int)canvas.getWidth()),
 							(double)rand.nextInt((int)canvas.getHeight()),
-							walkerSize));
+							walkerSize);
+
+				if (!w.insideTree()){
+					walkers.add(w);
+				}
 			}
 		}
 	}
@@ -192,18 +216,20 @@ public class Main extends Application {
 	}
 
 	//NOT IMPLEMENTED YET....if ever...
-	public void shiftTreeColor(Walker walker){
-		double currentGreen = treeColor.getGreen();
-		double currentRed = treeColor.getRed();
-		double currentBlue = treeColor.getBlue();
-
-		double minX = Math.min(Math.min(0,walker.getCenterX()),
-				Math.min(canvas.getWidth(),walker.getCenterX()));
-		double minY = Math.min(Math.min(0,walker.getCenterY()),
-				Math.min(canvas.getWidth(),walker.getCenterY()));
-
-		double min = Math.min(minX,minY);
-	}
+/*
+ *         public void shiftTreeColor(Walker walker){
+ *                 double currentGreen = treeColor.getGreen();
+ *                 double currentRed = treeColor.getRed();
+ *                 double currentBlue = treeColor.getBlue();
+ * 
+ *                 double minX = Math.min(Math.min(0,walker.getCenterX()),
+ *                                 Math.min(canvas.getWidth(),walker.getCenterX()));
+ *                 double minY = Math.min(Math.min(0,walker.getCenterY()),
+ *                                 Math.min(canvas.getWidth(),walker.getCenterY()));
+ * 
+ *                 double min = Math.min(minX,minY);
+ *         }
+ */
 
 	//Our walker class.
 	class Walker extends Circle implements Runnable{
@@ -237,6 +263,8 @@ public class Main extends Application {
 		//Check if it collides with a tree particle.
 		private boolean collides(Walker otherWalker){
 			boolean collides = false;
+
+
 			//Distance calculations...wow!
 			double distance = Math.sqrt(
 					(this.getCenterX()-otherWalker.getCenterX())*(this.getCenterX()-otherWalker.getCenterX())+
@@ -245,6 +273,14 @@ public class Main extends Application {
 
 			if((distance < (this.getRadius()+otherWalker.getRadius())/2.0) && otherWalker.isFrozen()){
 				collides=true;
+			}
+
+			//update tree dimensions.
+			if (collides) {
+				maxX = (int)Math.max(this.getCenterX(), maxX);
+				minX = (int)Math.min(this.getCenterX(), minX);
+				maxY = (int)Math.max(this.getCenterY(), maxY);
+				minY = (int)Math.min(this.getCenterY(), minY);
 			}
 			return collides;
 		}
@@ -281,11 +317,25 @@ public class Main extends Application {
 
 			//Check every walker in the tree, and if it collides with our particle, then change its state.
 			for(Walker t: tree){
-				if(this.collides(t)){
-					this.setFrozenAndChangeState();
-					//Main.this.shiftTreeColor(t);
+				if(this.insideTree()){
+					if(this.collides(t)){
+						this.setFrozenAndChangeState();
+						//Main.this.shiftTreeColor(t);
+					}
 				}
 			}
 		}
+
+		private boolean insideTree(){
+			boolean insideTree = false;
+			int d = (int)Math.round(this.getRadius()*5);
+
+			if ( ((this.getCenterX() < maxX) && (this.getCenterX() > minX))  &&
+					((this.getCenterY() < maxY) && (this.getCenterY() > minY)) ) {
+				insideTree = true;
+			}
+			return insideTree;
+		}
 	}
+
 }

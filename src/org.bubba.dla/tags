@@ -1,0 +1,40 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	0.0.0	/45968eff/
+Main	Main.java	/^public class Main extends Application {$/;"	c
+Walker	Main.java	/^		public Walker(double x, double y, double r){$/;"	m	class:Main.Walker
+Walker	Main.java	/^	class Walker extends Circle implements Runnable{$/;"	c	class:Main
+at	Main.java	/^	private AnimationTimer at;$/;"	f	class:Main	file:
+canvas	Main.java	/^	private Canvas canvas;$/;"	f	class:Main	file:
+collides	Main.java	/^		private boolean collides(Walker otherWalker){$/;"	m	class:Main.Walker	file:
+concurrentWalkers	Main.java	/^	private int concurrentWalkers = 2400;$/;"	f	class:Main	file:
+deadWalkers	Main.java	/^	private Vector<Walker> deadWalkers = new Vector<Walker>();$/;"	f	class:Main	file:
+draw	Main.java	/^	public void draw(GraphicsContext gc){$/;"	m	class:Main
+frozen	Main.java	/^		private boolean frozen = false;$/;"	f	class:Main.Walker	file:
+infiniteWalkers	Main.java	/^	private boolean infiniteWalkers = true;$/;"	f	class:Main	file:
+isFrozen	Main.java	/^		private boolean isFrozen(){$/;"	m	class:Main.Walker	file:
+main	Main.java	/^	public static void main(String[] args){$/;"	m	class:Main
+maxX	Main.java	/^	private double maxX = walkerSize*2;$/;"	f	class:Main	file:
+maxY	Main.java	/^	private double maxY = walkerSize*2;$/;"	f	class:Main	file:
+minX	Main.java	/^	private double minX = walkerSize*2;$/;"	f	class:Main	file:
+minY	Main.java	/^	private double minY = walkerSize*2;$/;"	f	class:Main	file:
+movementFactor	Main.java	/^	private double movementFactor = 5.0;$/;"	f	class:Main	file:
+rand	Main.java	/^	private Random rand = new Random();$/;"	f	class:Main	file:
+run	Main.java	/^		public void run(){$/;"	m	class:Main.Walker
+setFrozen	Main.java	/^		public void setFrozen(){$/;"	m	class:Main.Walker
+setFrozenAndChangeState	Main.java	/^		private void setFrozenAndChangeState(){$/;"	m	class:Main.Walker	file:
+skipFrames	Main.java	/^	private int skipFrames = 0;$/;"	f	class:Main	file:
+start	Main.java	/^	public void start(Stage window){$/;"	m	class:Main
+t	Main.java	/^	private Toolkit t = Toolkit.getDefaultToolkit();$/;"	f	class:Main	file:
+tree	Main.java	/^	private Vector<Walker> tree = new Vector<Walker>();$/;"	f	class:Main	file:
+treeColor	Main.java	/^	private Color treeColor = Color.FIREBRICK;$/;"	f	class:Main	file:
+update	Main.java	/^		private void update(){$/;"	m	class:Main.Walker	file:
+update	Main.java	/^	public void update(){$/;"	m	class:Main
+walkerColor	Main.java	/^	private Color walkerColor = Color.AQUAMARINE;$/;"	f	class:Main	file:
+walkerSize	Main.java	/^	private double walkerSize = 10.0;$/;"	f	class:Main	file:
+walkers	Main.java	/^	private Vector<Walker> walkers = new Vector<Walker>();$/;"	f	class:Main	file:
+windowSize	Main.java	/^	private int windowSize = 1200;$/;"	f	class:Main	file:
